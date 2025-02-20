@@ -1,3 +1,4 @@
+import ntpath
 import os
 import torch
 import argparse
@@ -54,7 +55,7 @@ def get_yaapt_f0(audio, sr=16000, interp=False):
 
 
 def inference(a): 
-    os.makedirs(a.output_dir, exist_ok=True) 
+    os.makedirs(ntpath.dirname(a.output_path), exist_ok=True) 
     mel_fn = MelSpectrogramFixed(
         sample_rate=hps.data.sampling_rate,
         n_fft=hps.data.filter_length,
@@ -110,12 +111,10 @@ def inference(a):
     trg_length = torch.LongTensor([trg_mel.size(-1)]).to(device)   
 
     with torch.no_grad(): 
-        c = model.vc(src_mel, w2v_x, f0_code, src_length, trg_mel, trg_length, n_timesteps=a.time_step, mode='ml')
+        c = model.vc(src_mel, w2v_x, f0_code, src_length, trg_mel, trg_length, n_timesteps=a.time_step, mode='ml', eps=a.epsilon, theta=a.theta)
         converted_audio = net_v(c)  
-        
-    f_name = f'{src_name}_to_{trg_name}.wav' 
-    out = os.path.join(a.output_dir, f_name)
-    save_audio(converted_audio, out)   
+
+    save_audio(converted_audio, a.output_path)   
     print(">> Done.")
      
 
@@ -128,8 +127,10 @@ def main():
     parser.add_argument('--ckpt_model', type=str, default='./ckpt/model_dddmvc.pth')
     parser.add_argument('--ckpt_voc', type=str, default='./vocoder/voc_ckpt.pth')   
     parser.add_argument('--ckpt_f0_vqvae', '-f', type=str, default='./f0_vqvae/G_720000.pth')
-    parser.add_argument('--output_dir', '-o', type=str, default='./converted')  
+    parser.add_argument('--output_path', '-o', type=str, default='./converted/out.wav')  
     parser.add_argument('--time_step', '-t', type=int, default=6)
+    parser.add_argument('--epsilon', type=float, default=0)
+    parser.add_argument('--theta', type=float, default=0)
     
     global hps, device, a
     
