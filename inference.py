@@ -23,7 +23,11 @@ h = None
 device = None
 seed = 1234
 torch.manual_seed(seed)
-torch.cuda.manual_seed(seed)  
+torch.cuda.manual_seed(seed)
+
+# global variables to cache the loaded model
+mel_fn, w2v, f0_quantizer, model, net_v = None, None, None, None, None
+
 
 def load_audio(path):
     audio, sr = torchaudio.load(path) 
@@ -55,38 +59,45 @@ def get_yaapt_f0(audio, sr=16000, interp=False):
 
 
 def inference(a): 
+    global mel_fn, w2v, f0_quantizer, model, net_v
+
     os.makedirs(ntpath.dirname(a.output_path), exist_ok=True) 
-    mel_fn = MelSpectrogramFixed(
-        sample_rate=hps.data.sampling_rate,
-        n_fft=hps.data.filter_length,
-        win_length=hps.data.win_length,
-        hop_length=hps.data.hop_length,
-        f_min=hps.data.mel_fmin,
-        f_max=hps.data.mel_fmax,
-        n_mels=hps.data.n_mel_channels,
-        window_fn=torch.hann_window
-    ).cuda()
+    if mel_fn is None:
+        mel_fn = MelSpectrogramFixed(
+            sample_rate=hps.data.sampling_rate,
+            n_fft=hps.data.filter_length,
+            win_length=hps.data.win_length,
+            hop_length=hps.data.hop_length,
+            f_min=hps.data.mel_fmin,
+            f_max=hps.data.mel_fmax,
+            n_mels=hps.data.n_mel_channels,
+            window_fn=torch.hann_window
+        ).cuda()
 
-    # Load pre-trained w2v (XLS-R)
-    w2v = Wav2vec2().cuda()  
+    if w2v is None:
+        # Load pre-trained w2v (XLS-R)
+        w2v = Wav2vec2().cuda()  
         
-    # Load model
-    f0_quantizer = Quantizer(hps).cuda()
-    utils.load_checkpoint(a.ckpt_f0_vqvae, f0_quantizer)
-    f0_quantizer.eval()
+    if f0_quantizer is None:
+        # Load model
+        f0_quantizer = Quantizer(hps).cuda()
+        utils.load_checkpoint(a.ckpt_f0_vqvae, f0_quantizer)
+        f0_quantizer.eval()
 
-    model = DDDM(hps.data.n_mel_channels, hps.diffusion.spk_dim,
-                   hps.diffusion.dec_dim, hps.diffusion.beta_min, hps.diffusion.beta_max, hps).cuda()
-    utils.load_checkpoint(a.ckpt_model, model, None)
-    model.eval()
+    if model is None:
+        model = DDDM(hps.data.n_mel_channels, hps.diffusion.spk_dim,
+                    hps.diffusion.dec_dim, hps.diffusion.beta_min, hps.diffusion.beta_max, hps).cuda()
+        utils.load_checkpoint(a.ckpt_model, model, None)
+        model.eval()
  
-    # Load vocoder
-    net_v = HiFi(hps.data.n_mel_channels, hps.train.segment_size // hps.data.hop_length, **hps.model).cuda()
-    utils.load_checkpoint(a.ckpt_voc, net_v, None)
-    net_v.eval().dec.remove_weight_norm()   
+    if net_v is None:
+        # Load vocoder
+        net_v = HiFi(hps.data.n_mel_channels, hps.train.segment_size // hps.data.hop_length, **hps.model).cuda()
+        utils.load_checkpoint(a.ckpt_voc, net_v, None)
+        net_v.eval().dec.remove_weight_norm()   
  
     # Convert audio 
-    print('>> Converting each utterance...') 
+    # print('>> Converting each utterance...') 
     src_name = os.path.splitext(os.path.basename(a.src_path))[0]
     audio = load_audio(a.src_path)   
 
@@ -115,7 +126,7 @@ def inference(a):
         converted_audio = net_v(c)  
 
     save_audio(converted_audio, a.output_path)   
-    print(">> Done.")
+    # print(">> Done.")
      
 
 def main():

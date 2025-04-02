@@ -246,6 +246,11 @@ class DDDM(BaseModule):
 
         return y[:, :, :max_length]
     
+    def encode_speaker(self, w2v_x, f0_x, x_lengths, y, y_lengths): 
+        out_enc, spk, src_out, ftr_out = self.encoder.voice_conversion(w2v_x, x_lengths, f0_x, y, y_lengths)
+        return spk
+
+
     def compute_loss(self, x, w2v_x, f0_x, x_length): 
         x_mask = sequence_mask(x_length, x.size(2)).unsqueeze(1).to(x.dtype)
         spk, src_out, ftr_out = self.encoder(w2v_x, f0_x, x, x_length, mixup=True)
