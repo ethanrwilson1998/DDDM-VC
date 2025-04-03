@@ -12,6 +12,7 @@ from model.diffusion import Diffusion
 from model.styleencoder import StyleEncoder
 from model.utils import sequence_mask, fix_len_compatibility
 from model.anonymization import anonymize
+from model.identity_dp_2 import anonymize_voice
 
 import numpy as np
 import utils
@@ -157,6 +158,7 @@ class SynthesizerTrn(nn.Module):
 
             # run anonymization
             g = anonymize(g, epsilon=eps, theta=theta)
+            # g = anonymize_voice(g, epsilon=eps)
             # convert std deviation
             g = g / torch.std(g) * g_std
 
@@ -246,11 +248,6 @@ class DDDM(BaseModule):
 
         return y[:, :, :max_length]
     
-    def encode_speaker(self, w2v_x, f0_x, x_lengths, y, y_lengths): 
-        out_enc, spk, src_out, ftr_out = self.encoder.voice_conversion(w2v_x, x_lengths, f0_x, y, y_lengths)
-        return spk
-
-
     def compute_loss(self, x, w2v_x, f0_x, x_length): 
         x_mask = sequence_mask(x_length, x.size(2)).unsqueeze(1).to(x.dtype)
         spk, src_out, ftr_out = self.encoder(w2v_x, f0_x, x, x_length, mixup=True)
