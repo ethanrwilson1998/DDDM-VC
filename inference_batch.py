@@ -49,7 +49,7 @@ def main():
     parser.add_argument(
         "--method", choices=["swap", "VoiceVMF", "IdentityDP"], type=str, default="swap"
     )
-    parser.add_argument("--epsilon", type=float, default=1000)
+    parser.add_argument("--epsilon", type=float, default=0)
     parser.add_argument("--theta", type=float, default=0)
 
     a = parser.parse_args()
