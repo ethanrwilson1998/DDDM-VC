@@ -18,7 +18,7 @@ def process_folder(a):
 
         new_clip = clip.replace(dataset_name, anon_dataset_name)
 
-        print(f"Processing {clip}...")
+        # print(f"Processing {clip}...")
         a.src_path = clip
         if a.method in ["VoiceVMF"]:
             a.trg_path = (
