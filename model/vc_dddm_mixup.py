@@ -11,8 +11,8 @@ from model.base import BaseModule
 from model.diffusion import Diffusion
 from model.styleencoder import StyleEncoder
 from model.utils import sequence_mask, fix_len_compatibility
-from model.anonymization import anonymize
-from model.identity_dp_2 import anonymize_voice
+from privacy_mechanisms.anonymization import anonymize
+
 
 import numpy as np
 import utils
@@ -135,7 +135,7 @@ class SynthesizerTrn(nn.Module):
 
         return g, y_s, y_f
         
-    def voice_conversion(self, w2v, x_length, f0_code, x_mel, length, eps=0, theta=0):
+    def voice_conversion(self, w2v, x_length, f0_code, x_mel, length, method="swap", eps=0, theta=0):
         y_mask = torch.unsqueeze(commons.sequence_mask(x_length, w2v.size(2)), 1).to(w2v.dtype)
 
         content = self.emb_c(w2v)
@@ -146,7 +146,7 @@ class SynthesizerTrn(nn.Module):
         g = self.emb_g(x_mel, x_mask).unsqueeze(-1)
 
         # VOICE MANIPULATION CODE:
-        if not (eps == 0 and theta == 0):
+        if method == "VoiceVMF" and not (eps == 0 and theta == 0):
 
             # stash the standard deviation (to better map output into the domain of plausible inputs).
             g_std = torch.std(g)
@@ -158,7 +158,6 @@ class SynthesizerTrn(nn.Module):
 
             # run anonymization
             g = anonymize(g, epsilon=eps, theta=theta)
-            # g = anonymize_voice(g, epsilon=eps)
             # convert std deviation
             g = g / torch.std(g) * g_std
 
@@ -215,10 +214,10 @@ class DDDM(BaseModule):
         
         return enc_out, src_out, ftr_out, y[:, :, :max_length]
     
-    def vc(self, x, w2v_x, f0_x, x_lengths, y, y_lengths, n_timesteps, mode='ml', eps=0, theta=0): 
+    def vc(self, x, w2v_x, f0_x, x_lengths, y, y_lengths, n_timesteps, mode='ml', method="swap", eps=0, theta=0): 
         x_mask = sequence_mask(x_lengths, x.size(2)).unsqueeze(1).to(x.dtype)
 
-        out_enc, spk, src_out, ftr_out = self.encoder.voice_conversion(w2v_x, x_lengths, f0_x, y, y_lengths, eps=eps, theta=theta)
+        out_enc, spk, src_out, ftr_out = self.encoder.voice_conversion(w2v_x, x_lengths, f0_x, y, y_lengths, method=method, eps=eps, theta=theta)
         src_mean_x, ftr_mean_x = self.decoder.compute_diffused_mean(x, x_mask, src_out, ftr_out, 1.0)
 
         b = x.shape[0]

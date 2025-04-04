@@ -61,6 +61,11 @@ def get_yaapt_f0(audio, sr=16000, interp=False):
 def inference(a): 
     global mel_fn, w2v, f0_quantizer, model, net_v
 
+    # in case this is being called from another file
+    config = os.path.join(os.path.split(a.ckpt_model)[0], 'config.json')  
+    hps = utils.get_hparams_from_file(config) 
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
     os.makedirs(ntpath.dirname(a.output_path), exist_ok=True) 
     if mel_fn is None:
         mel_fn = MelSpectrogramFixed(
@@ -122,7 +127,7 @@ def inference(a):
     trg_length = torch.LongTensor([trg_mel.size(-1)]).to(device)   
 
     with torch.no_grad(): 
-        c = model.vc(src_mel, w2v_x, f0_code, src_length, trg_mel, trg_length, n_timesteps=a.time_step, mode='ml', eps=a.epsilon, theta=a.theta)
+        c = model.vc(src_mel, w2v_x, f0_code, src_length, trg_mel, trg_length, n_timesteps=a.time_step, mode='ml', method=a.method, eps=a.epsilon, theta=a.theta)
         converted_audio = net_v(c)  
 
     save_audio(converted_audio, a.output_path)   
@@ -140,15 +145,11 @@ def main():
     parser.add_argument('--ckpt_f0_vqvae', '-f', type=str, default='./f0_vqvae/G_720000.pth')
     parser.add_argument('--output_path', '-o', type=str, default='./converted/out.wav')  
     parser.add_argument('--time_step', '-t', type=int, default=6)
+    parser.add_argument('--method', choices=["swap", "VoiceVMF", "IdentityDP"], type=str, default="swap")
     parser.add_argument('--epsilon', type=float, default=0)
     parser.add_argument('--theta', type=float, default=0)
-    
-    global hps, device, a
-    
+        
     a = parser.parse_args()
-    config = os.path.join(os.path.split(a.ckpt_model)[0], 'config.json')  
-    hps = utils.get_hparams_from_file(config) 
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     
     inference(a)
 
