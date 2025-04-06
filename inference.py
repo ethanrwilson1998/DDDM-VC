@@ -21,9 +21,9 @@ from model_f0_vqvae import Quantizer
 
 h = None
 device = None
-seed = 1234
-torch.manual_seed(seed)
-torch.cuda.manual_seed(seed)
+# seed = 1234
+# torch.manual_seed(seed)
+# torch.cuda.manual_seed(seed)
 
 # global variables to cache the loaded model
 mel_fn, w2v, f0_quantizer, model, net_v = None, None, None, None, None

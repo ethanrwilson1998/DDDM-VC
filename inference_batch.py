@@ -1,5 +1,6 @@
 import argparse
 import glob
+import ntpath
 import os
 
 import tqdm
@@ -11,16 +12,18 @@ def process_folder(a):
     audio_clips = glob.glob(f"{a.audio_folder}/**/*.wav", recursive=True)
 
     for clip in tqdm.tqdm(audio_clips):
-        folders = clip.split(os.sep)
-        dataset_name = folders[-4]
-        if a.method == "VoiceVMF":
-            anon_dataset_name = f"{dataset_name}_VoiceVMF_e{a.epsilon}"
 
-        new_clip = clip.replace(dataset_name, anon_dataset_name)
+        folder = ntpath.basename(a.audio_folder)
+        if a.method == "VoiceVMF":
+            anon_folder = f"{folder}_VoiceVMF_e{a.epsilon}"
+        elif a.method == "IdentityDP":
+            anon_folder = f"{folder}_IdentityDP_e{a.epsilon}"
+
+        new_clip = clip.replace(folder, anon_folder)
 
         # print(f"Processing {clip}...")
         a.src_path = clip
-        if a.method in ["VoiceVMF"]:
+        if a.method in ["VoiceVMF", "IdentityDP"]:
             a.trg_path = (
                 clip  # Since we are processing per participant, keep trg_path same
             )
