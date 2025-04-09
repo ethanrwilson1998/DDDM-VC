@@ -10,8 +10,8 @@ def voiceVMF_anonymize(embedding, epsilon: float = 1, theta: float = 90):
     embedding = embedding.cpu().detach().numpy()
     embedding = np.squeeze(embedding)
 
-    # # normalize the embedding
-    # embedding = embedding / np.linalg.norm(embedding)
+    # normalize the embedding
+    embedding = embedding / np.linalg.norm(embedding)
 
     # first, apply a random rotation sampled from VMF to give DP guarantees
     if epsilon > 0:
@@ -29,7 +29,7 @@ def voiceVMF_anonymize(embedding, epsilon: float = 1, theta: float = 90):
         theta_rads = theta * np.pi / 180
         rotated = rotate_embedding(rotated, theta_rads, rotated.shape[0])
 
-    # rotated = rotated / np.linalg.norm(rotated)
+    rotated = rotated / np.linalg.norm(rotated)
     return torch.reshape(torch.tensor(rotated, device=device, dtype=dtype), dims)
 
 

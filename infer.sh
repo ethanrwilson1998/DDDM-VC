@@ -5,8 +5,9 @@
 ARG1=${1:-'<src_path>'}  # not optional
 ARG2=${2:-'<trg_path>'}  # not optional
 ARG3=${3:-'./converted/out.wav'}
-ARG4=${4:-0}
+ARG4=${4:-'VoiceVMF'}
 ARG5=${5:-0}
+ARG6=${6:-0}
 
 python inference.py \
     --src_path $ARG1 \
@@ -16,5 +17,6 @@ python inference.py \
     --ckpt_f0_vqvae './f0_vqvae/f0_vqvae.pth' \
     --output_path $ARG3 \
     -t 100 \
-    --epsilon $ARG4 \
-    --theta $ARG5
+    --method $ARG4\
+    --epsilon $ARG5 \
+    --theta $ARG6

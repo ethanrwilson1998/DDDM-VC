@@ -184,8 +184,8 @@ class SynthesizerTrn(nn.Module):
 
         # VOICE MANIPULATION CODE:
         if method == "VoiceVMF" and not (eps == 0 and theta == 0):
-            # stash the standard deviation (to better map output into the domain of plausible inputs).
-            g_std = torch.std(g)
+            # stash the magnitude of the features (to better map output into the domain of plausible inputs).
+            g_magnitude = np.linalg.norm(g.view(-1, 1).cpu().detach().numpy())
 
             # override the random seed (somewhere in the original code fixed the seed, but we want a random output).
             # time_seed = int(time.time())
@@ -194,8 +194,10 @@ class SynthesizerTrn(nn.Module):
 
             # run anonymization
             g = voiceVMF_anonymize(g, epsilon=eps, theta=theta)
-            # convert std deviation
-            g = g / torch.std(g) * g_std
+            # replace the magnitude
+            g = g / np.linalg.norm(g.view(-1, 1).cpu().detach().numpy())
+            g = g * g_magnitude
+
         if method == "IdentityDP":
             # override the random seed (somewhere in the original code fixed the seed, but we want a random output).
             # time_seed = int(time.time())
