@@ -1,29 +1,27 @@
 import os
 import whisper
-from glob import glob
+import glob
+import tqdm
+
+model = None
+
 
 def transcribe_audio(audio_path):
-    model = whisper.load_model("turbo")
     result = model.transcribe(audio_path)
     transcript_path = audio_path.replace(".wav", ".txt")
-    with open(transcript_path, "w") as f:
+    with open(transcript_path, "w", encoding="utf-8") as f:
         f.write(result["text"])
-    print(f"Transcript saved: {transcript_path}")
+    # print(f"Transcript saved: {transcript_path}")
 
-def process_folder(audio_folder):
-    participants = sorted(os.listdir(audio_folder)) 
-    
-    for participant in participants:
-        participant_path = os.path.join(audio_folder, participant)
+def process_folder(a):
+    global model
+    model = whisper.load_model(a.model)
+
+    wav_files = glob.glob(f"{a.audio_folder}/**/*.wav", recursive=True)
         
-        if not os.path.isdir(participant_path):
-            continue  
-        
-        audio_clips = sorted(glob(os.path.join(participant_path, "*.wav")))
-        
-        for clip in audio_clips:
-            print(f'Transcribing {clip}...')
-            transcribe_audio(clip)  
+    for clip in tqdm.tqdm(wav_files):
+        # print(f'Transcribing {clip}...')
+        transcribe_audio(clip)  
     
     print(">> Transcription Process Complete.")
 
@@ -32,6 +30,7 @@ if __name__ == '__main__':
     
     parser = argparse.ArgumentParser()
     parser.add_argument('--audio_folder', type=str, default = './voxceleb_base', help='Path to folder containing participant audio')
+    parser.add_argument('--model', type=str, choices=['tiny.en', 'small.en', 'medium.en', 'turbo'], default='turbo', help='name of whisper model to use.')
     args = parser.parse_args()
     
-    process_folder(args.audio_folder)
+    process_folder(args)
