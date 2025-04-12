@@ -7,7 +7,7 @@
 #SBATCH --mem=32gb
 #SBATCH --partition=gpu
 #SBATCH --gpus=a100:1
-#SBATCH --time=06:00:00
+#SBATCH --time=72:00:00
 
 ## Usage: call sbatch slurm.sh <command to run>
 ## ex. sbatch slurm.sh python inference.py --arg1 <arg1>

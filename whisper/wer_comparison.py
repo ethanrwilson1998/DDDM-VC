@@ -30,9 +30,10 @@ def calculate_wer(a):
 
         original_text = load_transcript(ot)
         anonymized_text = load_transcript(at)
-
-        if original_text == "" or anonymized_text == "":
-            continue
+        if original_text is None:
+            original_text = ""
+        if anonymized_text is None:
+            anonymized_text = ""
 
         o_sents.append(original_text)
         a_sents.append(anonymized_text)
