@@ -48,6 +48,8 @@ def calculate_wer(a):
 if __name__ == "__main__":
     import argparse
 
+    # TODO: Skip 10292 because they only speak Hindi
+
     parser = argparse.ArgumentParser()
     parser.add_argument('--original_folder', default = './voxceleb_epsilon_1', help="Path to the original transcript directory")
     parser.add_argument('--anonymized_folder', default = './voxceleb_epsilon_1', help="Path to the anonymized transcript directory")
