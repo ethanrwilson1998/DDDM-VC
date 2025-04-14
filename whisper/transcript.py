@@ -30,7 +30,7 @@ if __name__ == '__main__':
     
     parser = argparse.ArgumentParser()
     parser.add_argument('--audio_folder', type=str, default = './voxceleb_base', help='Path to folder containing participant audio')
-    parser.add_argument('--model', type=str, choices=['tiny.en', 'small.en', 'medium.en', 'turbo'], default='turbo', help='name of whisper model to use.')
+    parser.add_argument('--model', type=str, choices=['tiny.en', 'small.en', 'medium.en', 'turbo', 'large-v3-turbo'], default='turbo', help='name of whisper model to use.')
     args = parser.parse_args()
     
     process_folder(args)

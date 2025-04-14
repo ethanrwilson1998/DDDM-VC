@@ -1,7 +1,7 @@
 # call from top-level folder, i.e., <sh ./bash/create_datasets.sh>
 
 cmd="python ./whisper/transcript.py \
---model turbo"
+--model large-v3-turbo"
 
 for dir in /blue/ejain/datasets/*/
 do
