@@ -5,6 +5,18 @@ import numpy as np
 import tqdm
 
 
+transforms = jiwer.Compose(
+    [
+        jiwer.ToLowerCase(),
+        jiwer.RemoveMultipleSpaces(),
+        jiwer.Strip(),
+        jiwer.ExpandCommonEnglishContractions(),
+        jiwer.RemovePunctuation(),
+        jiwer.ReduceToListOfListOfWords(),
+    ]
+)
+
+
 def load_transcript(file_path):
     """Loads text from a transcript file."""
     if not os.path.exists(file_path):
@@ -40,13 +52,13 @@ def calculate_wer(a):
             # anonymized_text = ""
             continue
         
-        wer_scores.append(jiwer.wer(original_text, anonymized_text))
+        wer_scores.append(jiwer.wer(original_text, anonymized_text, reference_transform=transforms, hypothesis_transform=transforms))
 
         o_sents.append(original_text)
         a_sents.append(anonymized_text)
 
     # Compute WER
-    wer = jiwer.wer(o_sents, a_sents)
+    wer = jiwer.wer(o_sents, a_sents, reference_transform=transforms, hypothesis_transform=transforms)
 
     for i in range(len(o_sents)):
         print(f"o:\n\t{o_sents[i]}")
