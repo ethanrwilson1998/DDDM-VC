@@ -1,43 +1,62 @@
 import argparse
 import glob
-from multiprocessing import process
 import ntpath
 import os
 
+import librosa
+import soundfile as sf
 import tqdm
 
 from inference import inference
+
+import logging
+logging.getLogger('numba').setLevel(logging.WARNING)
 
 
 def process_folder(a, folder):
 
     scp_file = f"{a.data_dir}/data/{folder}/wav.scp"
 
-    with open(scp_file, 'r') as file:
-        for line in file:
-            to_write, ext_file = line.split(" ")
+    with open(scp_file, 'r') as f:
+        print(scp_file)
+        for line in tqdm.tqdm(f, desc=folder):
+            line_items = line.split(" ")
+            if "train-clean-360" in folder:
+                to_write, ext_file = line_items[0], line_items[-2]
+            else:
+                to_write, ext_file = line_items[0], line_items[1]
 
             if a.method == "VoiceVMF":
-                to_file = f"{a.data_dir}/{folder}_VoiceVMF_e{a.epsilon}/{to_write}.wav"
+                to_file = f"{a.data_dir}/data/{folder}_VoiceVMF_e{a.epsilon}/wav/{to_write}.wav"
             elif a.method == "IdentityDP":
-                to_file = f"{a.data_dir}/{folder}_IdentityDP_e{a.epsilon}/{to_write}.wav"
+                to_file = f"{a.data_dir}/data/{folder}_IdentityDP_e{a.epsilon}/wav/{to_write}.wav"
 
-            a.src_path = f"{a.data_dir}{ext_file}"
+            a.src_path = f"{a.data_dir}/{ext_file}"
+            a.src_path = a.src_path.replace("\n", "")
             a.trg_path = a.src_path
             a.output_path = to_file
-            inference(a)
+
+            if not os.path.exists(a.output_path):
+                if ".flac" in a.src_path:
+                    wav_file, sr = librosa.load(a.src_path, sr=None)
+                    a.src_path = f"{a.data_dir}/data/tmp.wav"
+                    a.trg_path = a.src_path
+                    sf.write(a.src_path, wav_file, sr)
+
+                inference(a)
 
 def process_vpc(a):
 
-    process_folder("libri_dev_enrolls")
-    process_folder("libri_dev_trials_m")
-    process_folder("libri_dev_trials_f")
-    process_folder("libri_test_enrolls")
-    process_folder("libri_test_trials_m")
-    process_folder("libri_test_trials_f")
-    process_folder("IEMOCAP_dev")
-    process_folder("IEMOCAP_test")
-    process_folder("train-clean-360")
+    process_folder(a, "libri_dev_enrolls")
+    process_folder(a, "libri_dev_trials_m")
+    process_folder(a, "libri_dev_trials_f")
+    process_folder(a, "libri_test_enrolls")
+    process_folder(a, "libri_test_trials_m")
+    process_folder(a, "libri_test_trials_f")
+    process_folder(a, "IEMOCAP_dev")
+    process_folder(a, "IEMOCAP_test")
+    # TODO: do this last after all conditions have prior sets generated
+    #process_folder(a, "train-clean-360")
 
     print(">> Processing Complete.")
 
@@ -61,7 +80,7 @@ def main():
 
     a = parser.parse_args()
 
-    process_folder(a)
+    process_vpc(a)
 
 
 if __name__ == "__main__":

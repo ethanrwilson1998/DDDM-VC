@@ -4,15 +4,17 @@
 #SBATCH --mail-type=END
 #SBATCH --mail-user=ethanwilson@ufl.edu
 #SBATCH --ntasks=1
-#SBATCH --mem=32gb
+#SBATCH --cpus-per-task=2
+#SBATCH --mem=16gb
 #SBATCH --partition=gpu
-#SBATCH --gpus=a100:1
+#SBATCH --gpus=1
 #SBATCH --time=72:00:00
 
 ## Usage: call sbatch slurm.sh <command to run>
 ## ex. sbatch slurm.sh python inference.py --arg1 <arg1>
 
 module load conda
+module load ffmpeg
 
 conda activate /blue/ejain/conda/DDDM-VC.conda
 

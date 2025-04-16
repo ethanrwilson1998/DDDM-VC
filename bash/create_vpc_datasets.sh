@@ -1,7 +1,6 @@
 # call from top-level folder, i.e., <sh ./bash/create_datasets.sh>
 
-cmd="python inference_batch.py \
---audio_folder D:/vox1_test_wav \
+cmd="python vpc_inference.py \
 --ckpt_model ./ckpt/model_base.pth \
 --ckpt_voc ./vocoder/voc_ckpt.pth \
 --ckpt_f0_vqvae ./f0_vqvae/f0_vqvae.pth \

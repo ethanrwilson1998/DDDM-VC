@@ -4,6 +4,7 @@ import argparse
 import librosa
 import numpy as np
 import pandas as pd
+import tqdm
 
 def compute_pitch_variability(audio_path, sr=16000, fmin='C2', fmax='C7'):
     y, sr = librosa.load(audio_path, sr=sr)
@@ -48,7 +49,7 @@ def compute_pitch_variability(audio_path, sr=16000, fmin='C2', fmax='C7'):
 def process_directory(root_folder, sr=16000, fmin='C2', fmax='C7'):
     all_rows = []
     file_list = glob.glob(os.path.join(root_folder, '**', '*.wav'), recursive=True)
-    for audio_file in sorted(file_list):
+    for audio_file in tqdm.tqdm(sorted(file_list), desc=root_folder):
         try:
             metrics = compute_pitch_variability(audio_file, sr=sr, fmin=fmin, fmax=fmax)
             rel_path = os.path.relpath(audio_file, root_folder)
@@ -70,10 +71,10 @@ def process_directory(root_folder, sr=16000, fmin='C2', fmax='C7'):
                 "cv_slope": metrics['cv_slope']
             }
             all_rows.append(row)
-            print(f"{audio_file}: Mean={metrics['mean_pitch']:.2f}, Std={metrics['std_pitch']:.2f}, "
-                  f"Range={metrics['pitch_range']:.2f}, CV={metrics['cv']:.2f}, "
-                  f"MeanSlope={metrics['mean_slope']:.2f}, StdSlope={metrics['std_slope']:.2f}, "
-                  f"SlopeRange={metrics['slope_range']:.2f}, CVSlope={metrics['cv_slope']:.2f}")
+            # print(f"{audio_file}: Mean={metrics['mean_pitch']:.2f}, Std={metrics['std_pitch']:.2f}, "
+            #       f"Range={metrics['pitch_range']:.2f}, CV={metrics['cv']:.2f}, "
+            #       f"MeanSlope={metrics['mean_slope']:.2f}, StdSlope={metrics['std_slope']:.2f}, "
+            #       f"SlopeRange={metrics['slope_range']:.2f}, CVSlope={metrics['cv_slope']:.2f}")
         except Exception as e:
             print(f"Error processing {audio_file}: {e}")
     df = pd.DataFrame(all_rows)

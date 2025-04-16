@@ -2,6 +2,7 @@ import argparse
 import glob
 import ntpath
 import os
+import random
 
 import tqdm
 
@@ -18,6 +19,8 @@ def process_folder(a):
             anon_folder = f"{folder}_VoiceVMF_e{a.epsilon}"
         elif a.method == "IdentityDP":
             anon_folder = f"{folder}_IdentityDP_e{a.epsilon}"
+        elif a.method == "swap":
+            anon_folder = f"{folder}_swap"
 
         new_clip = clip.replace(folder, anon_folder)
 
@@ -27,6 +30,10 @@ def process_folder(a):
             a.trg_path = (
                 clip  # Since we are processing per participant, keep trg_path same
             )
+        if a.method == "swap":
+            a.trg_path = random.choice(audio_clips)
+
+
         a.output_path = new_clip
         inference(a)
 
