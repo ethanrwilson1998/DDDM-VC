@@ -27,8 +27,8 @@ def compute_pitch_variability(audio_path, sr=16000, fmin='C2', fmax='C7'):
         'std_pitch': std_p,
         'pitch_range': prange,
         'cv': cv,
-        'f0': f0,
-        'times': times,
+        'f0': f0, 
+        'times': vt, 
         'slopes': slopes
     }
 

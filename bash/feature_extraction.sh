@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cmd="python ./feature_extraction.py"
+cmd="python ./pitch_slope_and_other_features.py"
 
 for dir in /blue/ejain/datasets/*/
 do

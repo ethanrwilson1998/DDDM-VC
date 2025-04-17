@@ -1,6 +1,8 @@
 import argparse, json
 import numpy as np
 import pandas as pd
+import tqdm
+
 
 def load_slopes(csv_path, label):
     df = pd.read_csv(csv_path)
@@ -15,7 +17,7 @@ def main(csvs, labels, out_csv):
     merged = dfs[0].join(dfs[1:], how='inner')
     base   = labels[0]
     rows   = []
-    for key, row in merged.iterrows():
+    for key, row in tqdm.tqdm(merged.iterrows()):
         b = row[base]
         for other in labels[1:]:
             c = row[other]

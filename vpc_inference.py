@@ -36,7 +36,17 @@ def process_folder(a, folder):
             a.trg_path = a.src_path
             a.output_path = to_file
 
-            if not os.path.exists(a.output_path):
+            can_open_file = False
+            if os.path.exists(a.output_path):
+                try:
+                    librosa.load(a.output_path, sr=None)
+                    can_open_file = True
+                except Exception as e:
+                    print(f"Could not load file - {e}")
+                    pass
+
+            
+            if not can_open_file:
                 if ".flac" in a.src_path:
                     wav_file, sr = librosa.load(a.src_path, sr=None)
                     a.src_path = f"{a.data_dir}/data/tmp.wav"
