@@ -6,6 +6,8 @@ import librosa
 import numpy as np
 import pandas as pd
 
+import tqdm
+
 def compute_pitch_variability(audio_path, sr=16000, fmin='C2', fmax='C7'):
     y, sr = librosa.load(audio_path, sr=sr)
     fmin_hz = librosa.note_to_hz(fmin) if isinstance(fmin, str) else fmin
@@ -34,11 +36,14 @@ def compute_pitch_variability(audio_path, sr=16000, fmin='C2', fmax='C7'):
 
 def process_directory(root_folder, sr=16000, fmin='C2', fmax='C7'):
     rows=[]  
-    for wav in sorted(glob.glob(os.path.join(root_folder,'**','*.wav'),recursive=True)):
+    for wav in tqdm.tqdm(sorted(glob.glob(os.path.join(root_folder,'**','*.wav'),recursive=True)), desc=root_folder):
         try:
             m=compute_pitch_variability(wav,sr,fmin,fmax)
-            rel=os.path.relpath(wav,root_folder).split(os.sep)
-            sp, vid = rel[0], rel[1] if len(rel)>=3 else ''
+            if len(rel) >= 4:
+                rel=os.path.relpath(wav,root_folder).split(os.sep)
+            else:
+                sp, vid = '', ''
+            sp, vid = rel[1], rel[2] if len(rel)>=3 else ''
             row={
                 'speaker':sp,'video':vid,'file':os.path.basename(wav),
                 'mean_pitch':m['mean_pitch'],'std_pitch':m['std_pitch'],
