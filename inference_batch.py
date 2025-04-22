@@ -5,6 +5,7 @@ import os
 import random
 
 import tqdm
+import shutil
 
 from inference import inference
 
@@ -35,7 +36,11 @@ def process_folder(a):
 
 
         a.output_path = new_clip
-        inference(a)
+        try:
+            inference(a)
+        except Exception as e:
+            print(f"Failed on {a.src_path}, {e}")
+            shutil.copy(a.src_path, a.output_path)
 
     print(">> Processing Complete.")
 

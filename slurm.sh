@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=DDDM-VC_%j
+#SBATCH --job-name=DDDM-VC
 #SBATCH --output=latest_log.out
 #SBATCH --mail-type=END
 #SBATCH --mail-user=ethanwilson@ufl.edu
