@@ -1,13 +1,13 @@
 #!/bin/bash
 #SBATCH --job-name=DDDM-VC
-#SBATCH --output=latest_log.out
+#SBATCH --output=arihant_log2.out
 #SBATCH --mail-type=END
 #SBATCH --mail-user=ethanwilson@ufl.edu
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=8gb
-#SBATCH --partition=gpu
-#SBATCH --gpus=1
+#SBATCH --mem=4gb
+##SBATCH --partition=gpu
+##SBATCH --gpus=1
 #SBATCH --time=72:00:00
 
 ## Usage: call sbatch slurm.sh <command to run>

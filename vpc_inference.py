@@ -20,7 +20,16 @@ def process_folder(a, folder):
 
     with open(scp_file, 'r') as f:
         print(scp_file)
+
+        # NOTE: TEMP TO CREATE SMALL TRAIN SETS
+        counter = 0
+
         for line in tqdm.tqdm(f, desc=folder):
+            counter += 1
+            if counter > 10000:
+                return
+
+
             line_items = line.split(" ")
             if "train-clean-360" in folder:
                 to_write, ext_file = line_items[0], line_items[-2]
@@ -28,7 +37,7 @@ def process_folder(a, folder):
                 to_write, ext_file = line_items[0], line_items[1]
 
             if a.method == "VoiceVMF":
-                to_file = f"{a.data_dir}/data/{folder}_VoiceVMF_e{a.epsilon}/wav/{to_write}.wav"
+                to_file = f"{a.data_dir}/data/{folder}_VoiceVMF2_e{a.epsilon}/wav/{to_write}.wav"
             elif a.method == "IdentityDP":
                 to_file = f"{a.data_dir}/data/{folder}_IdentityDP_e{a.epsilon}/wav/{to_write}.wav"
             elif a.method == "pitchshift":

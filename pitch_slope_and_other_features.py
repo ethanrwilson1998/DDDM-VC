@@ -20,15 +20,15 @@ def compute_pitch_variability(audio_path, sr=16000, fmin='C2', fmax='C7'):
     mean_p, std_p = vf0.mean(), vf0.std()
     prange = np.ptp(vf0)
     cv = std_p / mean_p if mean_p else np.nan
-    vt = times[voiced]
-    slopes = np.diff(vf0) / np.diff(vt) if len(vf0) > 1 else np.array([])
+    #vt = times[voiced]
+    slopes = np.diff(f0) / np.diff(times) if len(vf0) > 1 else np.array([])
     return {
         'mean_pitch': mean_p,
         'std_pitch': std_p,
         'pitch_range': prange,
         'cv': cv,
         'f0': f0, 
-        'times': vt, 
+        'times': times, 
         'slopes': slopes
     }
 

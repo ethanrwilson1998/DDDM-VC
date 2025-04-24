@@ -186,6 +186,8 @@ class SynthesizerTrn(nn.Module):
         if method == "VoiceVMF" and not (eps == 0 and theta == 0):
             # stash the magnitude of the features (to better map output into the domain of plausible inputs).
             g_magnitude = np.linalg.norm(g.view(-1, 1).cpu().detach().numpy())
+            g_magnitude = 12
+
 
             # override the random seed (somewhere in the original code fixed the seed, but we want a random output).
             # time_seed = int(time.time())

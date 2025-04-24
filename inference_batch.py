@@ -17,7 +17,7 @@ def process_folder(a):
 
         folder = ntpath.basename(a.audio_folder)
         if a.method == "VoiceVMF":
-            anon_folder = f"{folder}_VoiceVMF_e{a.epsilon}"
+            anon_folder = f"{folder}_VoiceVMF2_e{a.epsilon}"
         elif a.method == "IdentityDP":
             anon_folder = f"{folder}_IdentityDP_e{a.epsilon}"
         elif a.method == "swap":
